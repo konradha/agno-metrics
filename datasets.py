@@ -1,7 +1,18 @@
 import numpy as np
 
+
 class InMemoryPDESet:
-    def __init__(self, coords_y, coords_x, features, csr_indices, csr_indptr, seq_ids, t_steps, domain_ids):
+    def __init__(
+        self,
+        coords_y,
+        coords_x,
+        features,
+        csr_indices,
+        csr_indptr,
+        seq_ids,
+        t_steps,
+        domain_ids,
+    ):
         self.coords_y = coords_y
         self.coords_x = coords_x
         self.features = features
@@ -19,7 +30,11 @@ class InMemoryPDESet:
         x = self.coords_x
         f_y = self.features[i]
         csr = {"indices": self.csr_indices, "indptr": self.csr_indptr}
-        meta = {"seq_id": self.seq_ids[i], "t": self.t_steps[i], "domain": self.domain_ids[i]}
+        meta = {
+            "seq_id": self.seq_ids[i],
+            "t": self.t_steps[i],
+            "domain": self.domain_ids[i],
+        }
         return y, x, f_y, csr, meta
 
     def filter_by_seq(self, seq_id):
@@ -28,4 +43,3 @@ class InMemoryPDESet:
 
     def indices_by_domain(self, domain_id):
         return np.nonzero(self.domain_ids == domain_id)[0]
-

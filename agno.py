@@ -4,6 +4,7 @@ import flax.linen as nn
 from .mlp import MLP
 from .segment_ops import csr_repeat_ids, segment_softmax, segment_sum
 
+
 class AGNO(nn.Module):
     mlp_sizes: tuple
     transform_type: str = "linear"
@@ -33,8 +34,12 @@ class AGNO(nn.Module):
 
         if self.use_attn:
             if self.attention_type == "dot_product":
-                q = nn.Dense(self.attention_dim, use_bias=False)(self_x[:, : self.coord_dim])
-                k = nn.Dense(self.attention_dim, use_bias=False)(rep_y[:, : self.coord_dim])
+                q = nn.Dense(self.attention_dim, use_bias=False)(
+                    self_x[:, : self.coord_dim]
+                )
+                k = nn.Dense(self.attention_dim, use_bias=False)(
+                    rep_y[:, : self.coord_dim]
+                )
                 s = jnp.sum(q * k, axis=-1) / jnp.sqrt(self.attention_dim)
             else:
                 qx = self_x[:, : self.coord_dim]
@@ -47,7 +52,9 @@ class AGNO(nn.Module):
             a = None
 
         agg = jnp.concatenate([rep_y, self_x], axis=-1)
-        if f_y is not None and (self.transform_type in ("nonlinear", "nonlinear_kernelonly")):
+        if f_y is not None and (
+            self.transform_type in ("nonlinear", "nonlinear_kernelonly")
+        ):
             if f_y.ndim == 3:
                 b = f_y[:, idx, :].reshape((-1, f_y.shape[-1]))
                 B = f_y.shape[0]
@@ -58,7 +65,10 @@ class AGNO(nn.Module):
                 agg = jnp.concatenate([rep_y, self_x, b], axis=-1)
                 if a is not None:
                     a = jnp.tile(a, (B,))
-                segids = jnp.tile(segids, (B,)) + jnp.repeat(jnp.arange(B, dtype=segids.dtype), K) * M
+                segids = (
+                    jnp.tile(segids, (B,))
+                    + jnp.repeat(jnp.arange(B, dtype=segids.dtype), K) * M
+                )
             else:
                 b = f_y[idx]
                 agg = jnp.concatenate([agg, b], axis=-1)
@@ -76,7 +86,10 @@ class AGNO(nn.Module):
                     m = jnp.tile(m, (B, 1))
                     if a is not None:
                         a = jnp.tile(a, (B,))
-                    segids = jnp.tile(segids, (B,)) + jnp.repeat(jnp.arange(B, dtype=segids.dtype), K) * M
+                    segids = (
+                        jnp.tile(segids, (B,))
+                        + jnp.repeat(jnp.arange(B, dtype=segids.dtype), K) * M
+                    )
             else:
                 fy = f_y[idx]
             if f_y is not None:
@@ -94,7 +107,11 @@ class AGNO(nn.Module):
         else:
             red = "sum" if a is not None else "mean"
 
-        nsegs = int(x.shape[0] * f_y.shape[0]) if (f_y is not None and f_y.ndim == 3) else int(x.shape[0])
+        nsegs = (
+            int(x.shape[0] * f_y.shape[0])
+            if (f_y is not None and f_y.ndim == 3)
+            else int(x.shape[0])
+        )
         out = segment_sum(m, segids, nsegs)
 
         if red == "mean" and (a is None):
@@ -110,4 +127,3 @@ class AGNO(nn.Module):
         else:
             out = out.reshape((1, x.shape[0], -1)) if f_y is not None else out
         return out
-

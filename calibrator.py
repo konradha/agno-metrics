@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class IsotonicCalibrator:
     def __init__(self):
         self.x_ = None
@@ -46,7 +47,7 @@ class IsotonicCalibrator:
         if y_expanded.shape[0] < w.sum():
             pad = int(w.sum() - y_expanded.shape[0])
             y_expanded = np.concatenate([y_expanded, np.full(pad, y_expanded[-1])])
-        return y_expanded[:int(w.sum())]
+        return y_expanded[: int(w.sum())]
 
     def transform(self, x):
         x = np.asarray(x, dtype=np.float64)
@@ -58,4 +59,3 @@ class IsotonicCalibrator:
         y1 = self.y_[idx]
         t = np.where(x1 > x0, (x - x0) / (x1 - x0), 0.0)
         return y0 + t * (y1 - y0)
-

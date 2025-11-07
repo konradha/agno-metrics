@@ -1,6 +1,7 @@
 import numpy as np
 from entropy_targets import targets_from_sequences
 
+
 def sample_pairs(meta_seq, meta_t, num_pairs, rng):
     n = meta_seq.shape[0]
     rs = np.random.RandomState(rng)
@@ -8,6 +9,7 @@ def sample_pairs(meta_seq, meta_t, num_pairs, rng):
     j = rs.randint(0, n, size=num_pairs)
     same = meta_seq[i] == meta_seq[j]
     return i, j, same
+
 
 def build_supervised_pairs(meta_seq, meta_t, seq_lengths, c_per_seq, num_pairs, rng):
     i, j, same = sample_pairs(meta_seq, meta_t, num_pairs, rng)
@@ -19,6 +21,7 @@ def build_supervised_pairs(meta_seq, meta_t, seq_lengths, c_per_seq, num_pairs, 
         g[m] = targets_from_sequences(meta_t[i[m]], meta_t[j[m]], L[m], c[m])
     g[~m] = 1.0
     return i, j, g
+
 
 def build_triplets(meta_seq, meta_t, num_triplets, rng):
     rs = np.random.RandomState(rng)
